@@ -2,12 +2,10 @@
 
 Repository hosting python code developed at NWTC to work with atmospheric boundary layer data.
 
-==============
 Acknowledgment
 ==============
 	If you use this code as part of any published research, please acknowledge the ``NWTC Open Source Wind Research Repositories (OSWRR)``. 
 
-==============
 Guidelines
 ==============
 	All added code must be documented with python docstrings as shown in the example below.
