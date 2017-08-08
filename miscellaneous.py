@@ -6,9 +6,48 @@ Miscellaneous little functions that get called from a variety of codes.
 
 """
 
+import os
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+from matplotlib.colors import LinearSegmentedColormap
+
+#==============================================================================
+# 
+#==============================================================================
+
+def idl_colortable(table='windcolor43.tbl'):
+    """
+    Processes an IDL color table, which was extracted in IDL as follows:
+
+      loadct,43,File='windcolor.tbl',RGB_TABLE=cmap
+      cmap
+
+    Table 43 (default used by NOAA) is called "wind1"
+
+    The output (3,N) array was manually saved into the provided color
+    table file and is processed here into a usable matplotlib colormap.
+
+    Parameters
+    ----------
+    table : str
+        Local or provided color table from IDL
+    """
+    try:
+        tab = np.loadtxt(table) # rgb.shape == (3, N)
+    except IOError:
+        relpath = os.path.join(os.path.dirname(__file__),table)
+        tab = np.loadtxt(relpath)
+    tab /= 255.0
+    Ncolors = tab.shape[1]
+    x = np.linspace(0,1,Ncolors)
+    cdict = { 'red': [], 'green': [], 'blue': [] }
+    for level in range(Ncolors):
+        rgb = tab[:,level]
+        cdict['red'  ].append( (x[level],rgb[0],rgb[0]) )
+        cdict['green'].append( (x[level],rgb[1],rgb[1]) )
+        cdict['blue' ].append( (x[level],rgb[2],rgb[2]) )
+    return LinearSegmentedColormap('NOAA_wind1', cdict)
 
 #==============================================================================
 # 
