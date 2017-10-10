@@ -432,7 +432,7 @@ class stochasticTurbulence:
         plt.colorbar()   
         plt.show()
      
-    def spectrum(self,component='u',y=None,z=None,smooth=True):
+    def spectrum(self,component='u',y=None,z=None):
         """
         Calculate spectrum of a specific component, given time series at ~ hub.
         
@@ -455,8 +455,7 @@ class stochasticTurbulence:
         N       = data.size
         freqs   = fftpack.fftfreq(N,self.dT)[1:N/2]
         psd     = (np.abs(fftpack.fft(data,N)[1:N/2]))**2
-        if smooth:
-            [freqs, psd] = smooth_spectrum(freqs,psd)
+
         return [freqs, psd]        
     
     def readFastOut(self,pathToFastOut=None):
