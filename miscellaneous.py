@@ -126,36 +126,3 @@ def make_multi_index(tuple_1=None,tuple_2=None,tuple_3=None):
     tuples = list(zip(*arrays))
     
     return pd.MultiIndex.from_tuples(tuples) 
-#==============================================================================
-# 
-#==============================================================================
-def smooth_spectrum(freqs,psd,dl=0.1):    
-    """
-    Smooth a noisy spectrum (the further down the high-frequency spectral tail, the more points are used in the averaging).
-    
-    Parameters
-    ----------
-    freqs : np.array,
-        frequencies
-    psd : np.array,
-        signal power
-    dl : float,
-        factor that modulates the rate at which we increase the smoothing window
-        
-    Returns
-    -------
-    np.array,
-        smoothed frequencies
-    np.array,
-        smoothed signal power
-    """
-    nStart          = 0
-    nEnd            = 1
-    l               = 0
-    freqs_smooth    = []
-    psd_smooth      = []
-    while nEnd<len(psd):
-        freqs_smooth.append(np.mean(freqs[nStart:nEnd+1]))
-        psd_smooth.append(np.mean(psd[nStart:nEnd+1]))
-        nStart = nEnd ; l += dl ; m = int(np.round(2**l)) ; nEnd += m
-    return np.array(freqs_smooth),np.array(psd_smooth)   
