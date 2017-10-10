@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# Helper script for noaa_snapshots.py
+# Written by Eliot Quon (eliot.quon@nrel.gov)
+#
+# Before use, check the two overlapping time directories as well as the time offset below.
+#
 time0=2016111206
 time1=2016111218
 offset=12

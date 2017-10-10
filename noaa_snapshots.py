@@ -6,6 +6,17 @@
 #
 # Written by Eliot Quon (eliot.quon@nrel.gov) -- 2017-09-13
 #
+# Sample usage
+# ------------
+#   noaa_snapshots.py -p ustar -t 2016111206 
+#   noaa_snapshots.py -p ustar -t 2016111218 
+#   merge_snapshot_dirs.sh ustar
+#
+# This example will create time directories '201611206' and '2016111218' with a series of simualted
+#   HRR data. The helper shell script will create a directory called 'ustar' and created symlinks to
+#   the snapshots in the separate time directories, so that the complete time series can be
+#   previewed in flipbook fashion.
+#
 import os
 import argparse
 import urllib2
