@@ -62,7 +62,7 @@ if __name__ == '__main__':
             description='Tool for downloading a series of simulation snapshots from rapidrefresh.noaa.gov',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-p', '--plot', dest='plot_type', type=str, required=True,
-            help='abbreviated plot name to retrieve (sfc_ri, sfc_sh, ustar, pblh, 80m_tke, ...)')
+            help='abbreviated plot name to retrieve (80m_wind_full, 80m_tke, ustar, sfc_ri, sfc_sh, pblh, ...)')
     parser.add_argument('-t', '--runtime', dest='runtime', type=str, required=True,
             default='2016111206', metavar='YYYYMMDDHH',
             help='date-time string for when the simulation was initialized; HH==(06,18)')
