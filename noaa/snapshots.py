@@ -8,8 +8,8 @@
 #
 # Sample usage
 # ------------
-#   noaa_snapshots.py -p ustar -t 2016111206 
-#   noaa_snapshots.py -p ustar -t 2016111218 
+#   snapshots.py -p ustar -t 2016111206 
+#   snapshots.py -p ustar -t 2016111218 
 #   merge_snapshot_dirs.sh ustar
 #
 # This example will create time directories '201611206' and '2016111218' with a series of simualted
