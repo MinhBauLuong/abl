@@ -5,6 +5,7 @@
 #
 # Before use, check the two overlapping time directories as well as the time offset below.
 #
+set -e
 time0=2016111206
 time1=2016111218
 offset=12
@@ -14,8 +15,9 @@ if [ -z "$1" ]; then
 else
     qty="$1"
     mkdir -p $qty
+    rootdir=`pwd`
     cd $qty
-    for f in ../$time0/$qty/*; do
+    for f in $rootdir/$time0/$qty/*; do
         name=${f##*/}
         name=${name%.png}
         tstr=${name:(-4)}
@@ -24,7 +26,7 @@ else
         fname=$name$tstr.png
         ln -sv $f $fname
     done
-    for f in ../$time1/$qty/*; do
+    for f in $rootdir/$time1/$qty/*; do
         name=${f##*/}
         name=${name%.png}
         tstr=${name:(-4)}
