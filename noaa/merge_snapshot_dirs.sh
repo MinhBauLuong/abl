@@ -6,14 +6,27 @@
 # Before use, check the two overlapping time directories as well as the time offset below.
 #
 set -e
-time0=2016111206
-time1=2016111218
-offset=12
+#time0=2016111206
+#time1=2016111218
+#offset=12 # hours
 
-if [ -z "$1" ]; then
-    echo 'Specify plot to merge'
+hours_offset()
+{
+    python -c "from datetime import datetime; DTobj = lambda s: datetime(int(s[:4]),int(s[4:6]),int(s[6:8]),int(s[8:10])); print int((DTobj('$2')-DTobj('$1')).seconds/3600.)"
+}
+
+if [ -z "$3" ]; then
+    #echo 'Specify plot to merge'
+    echo "USAGE: $0 [fieldName] [time0] [time1]"
 else
     qty="$1"
+    time0="$2"
+    time1="$3"
+    if [ -z "$4" ]; then
+        #offset=$((time1-time0))
+        offset=`hours_offset $time0 $time1`
+        echo "Detected offset: $offset hours"
+    fi
     mkdir -p $qty
     rootdir=`pwd`
     cd $qty
