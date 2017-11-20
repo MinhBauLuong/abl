@@ -28,6 +28,11 @@ def idl_colortable(table='windcolor43.tbl'):
     The output (3,N) array was manually saved into the provided color
     table file and is processed here into a usable matplotlib colormap.
 
+    Sample usage:
+
+      from abl.miscellaneous import idl_colortable
+      plt.contourf(T, Z, U, cmap=idl_colortable())
+
     Parameters
     ----------
     table : str
