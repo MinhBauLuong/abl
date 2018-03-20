@@ -12,6 +12,7 @@ import time
 import numpy as np
 
 from abl.inflow.general_inflow import InflowPlane
+from datatools.binario import binaryfile
 
 class TurbSim(InflowPlane):
 

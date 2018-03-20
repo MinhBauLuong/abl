@@ -4,8 +4,7 @@ import time
 
 import numpy as np
 
-import datatools.SOWFA.timeVaryingMappedBC as bc
-from datatools.binario import binaryfile
+import datatools.SOWFA.timeVaryingMappedBC as sowfa_bc
 
 class InflowPlane(object):
     """This is the base class for all inflows. User should create an
@@ -477,7 +476,7 @@ class InflowPlane(object):
         fname = os.path.join(dpath,'points')
         print('Writing',fname)
         with open(fname,'w') as f:
-            f.write(bc.pointsheader.format(patchName=bcname,N=NY*NZ))
+            f.write(sowfa_bc.pointsheader.format(patchName=bcname,N=NY*NZ))
             for k in range(NZ):
                 for j in range(NY):
                     f.write('({:f} {:f} {:f})\n'.format(xinlet,
@@ -518,7 +517,7 @@ class InflowPlane(object):
             # write out U
             fname = os.path.join(prefix,'U')
             print('Writing out',fname)
-            bc.write_data(fname,
+            sowfa_bc.write_data(fname,
                           np.stack((u.ravel(order='F'),
                                     v.ravel(order='F'),
                                     w.ravel(order='F'))),
@@ -529,7 +528,7 @@ class InflowPlane(object):
             # write out T
             fname = os.path.join(prefix,'T')
             print('Writing out',fname)
-            bc.write_data(fname,
+            sowfa_bc.write_data(fname,
                           T.ravel(order='F'),
                           patchName=bcname,
                           timeName=tname,
@@ -538,7 +537,7 @@ class InflowPlane(object):
             # write out k
             fname = os.path.join(prefix,'k')
             print('Writing out',fname)
-            bc.write_data(fname,
+            sowfa_bc.write_data(fname,
                           kinput[itime,:,:].ravel(order='F'),
                           patchName=bcname,
                           timeName=tname,
