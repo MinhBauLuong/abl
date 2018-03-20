@@ -11,7 +11,7 @@ import time
 
 import numpy as np
 
-from inflow_plane import InflowPlane
+from abl.inflow.general_inflow import InflowPlane
 
 class TurbSim(InflowPlane):
 
@@ -44,22 +44,23 @@ class TurbSim(InflowPlane):
             #
             # read header info
             #
-            if self.verbose: print 'Reading header information from',fname
+            if self.verbose: print('Reading header information from',fname)
 
             ID = f.read_int2()
             assert( ID==7 or ID==8 )
             if ID==7: filetype = 'non-periodic'
             elif ID==8: filetype = 'periodic'
             else: filetype = 'UNKNOWN'
-            if self.verbose: print '  id= {:d} ({:s})'.format(ID,filetype)
+            if self.verbose:
+                print('  id= {:d} ({:s})'.format(ID,filetype))
 
             # - read resolution settings
             self.NZ = f.read_int4()
             self.NY = f.read_int4()
             self.Ntower = f.read_int4()
             if self.verbose:
-                print '  NumGrid_Z,_Y=',self.NZ,self.NY
-                print '  ntower=',self.Ntower
+                print('  NumGrid_Z,_Y=',self.NZ,self.NY)
+                print('  ntower=',self.Ntower)
             self.N = f.read_int4()
             self.dz = f.read_float(dtype=self.realtype)
             self.dy = f.read_float(dtype=self.realtype)
@@ -67,11 +68,11 @@ class TurbSim(InflowPlane):
             self.period  = self.realtype(self.N * self.dt)
             self.Nsize = 3*self.NY*self.NZ*self.N
             if self.verbose:
-                print '  nt=',self.N
-                print '  (problem size: {:d} points)'.format(self.Nsize)
-                print '  dz,dy=',self.dz,self.dy
-                print '  TimeStep=',self.dt
-                print '  Period=',self.period
+                print('  nt=',self.N)
+                print('  (problem size: {:d} points)'.format(self.Nsize))
+                print('  dz,dy=',self.dz,self.dy)
+                print('  TimeStep=',self.dt)
+                print('  Period=',self.period)
 
             # - read reference values
             self.uhub = f.read_float(dtype=self.realtype)
@@ -80,14 +81,16 @@ class TurbSim(InflowPlane):
             if self.Umean is None:
                 self.Umean = self.uhub
                 if self.verbose:
-                    print '  Umean = uhub =',self.Umean,'(for calculating fluctuations)'
+                    print('  Umean = uhub =',self.Umean,
+                          '(for calculating fluctuations)')
             else: # user-specified Umean
                 if self.verbose:
-                    print '  Umean =',self.Umean,'(for calculating fluctuations)'
-                    print '  uhub=',self.uhub,' (NOT USED)'
+                    print('  Umean =',self.Umean,
+                          '(for calculating fluctuations)')
+                    print('  uhub=',self.uhub,' (NOT USED)')
             if self.verbose:
-                print '  HubHt=',self.zhub,' (NOT USED)'
-                print '  Zbottom=',self.zbot
+                print('  HubHt=',self.zhub,' (NOT USED)')
+                print('  Zbottom=',self.zbot)
 
             # - read scaling factors
             self.Vslope = np.zeros(3,dtype=self.realtype)
@@ -97,45 +100,48 @@ class TurbSim(InflowPlane):
                 self.Vintercept[i] = f.read_float(dtype=self.realtype)
             if self.verbose:
                 # output is float64 precision by default...
-                #print '  Vslope=',self.Vslope
-                #print '  Vintercept=',self.Vintercept
-                print '  Vslope=',[self.Vslope[i] for i in range(3)]
-                print '  Vintercept=',[self.Vintercept[i] for i in range(3)]
+                print('  Vslope=',self.Vslope)
+                print('  Vintercept=',self.Vintercept)
 
             # - read turbsim info string
             nchar = f.read_int4()
             version = f.read(N=nchar)
-            if self.verbose: print version
+            if self.verbose: print(version)
 
             #
             # read normalized data
             #
             # note: need to specify Fortran-order to properly read data using np.nditer
             t0 = time.clock()
-            if self.verbose: print 'Reading normalized grid data'
+            if self.verbose: print('Reading normalized grid data')
 
             self.U = np.zeros((3,self.NY,self.NZ,self.N),order='F',dtype=self.realtype)
             self.T = np.zeros((self.N,self.NY,self.NZ))
             if self.verbose:
-                print '  U size :',self.U.nbytes/1024.**2,'MB'
+                print('  U size :',self.U.nbytes/1024.**2,'MB')
 
             for val in np.nditer(self.U, op_flags=['writeonly']):
                 val[...] = f.read_int2()
             self.U = self.U.swapaxes(3,2).swapaxes(2,1) # new shape: (3,self.N,self.NY,self.NZ)
 
             if self.Ntower > 0:
-                if self.verbose: print 'Reading normalized tower data'
-                self.Utow = np.zeros((3,self.Ntower,self.N),order='F',dtype=self.realtype)
-                if self.verbose: print '  Utow size :',self.Utow.nbytes/1024.**2,'MB'
+                if self.verbose:
+                    print('Reading normalized tower data')
+                self.Utow = np.zeros((3,self.Ntower,self.N),
+                                     order='F',dtype=self.realtype)
+                if self.verbose:
+                    print('  Utow size :',self.Utow.nbytes/1024.**2,'MB')
                 for val in np.nditer(self.Utow, op_flags=['writeonly']):
                     val[...] = f.read_int2()
 
-            if self.verbose: print '  Read velocitiy fields in',time.clock()-t0,'s'
+            if self.verbose:
+                print('  Read velocitiy fields in',time.clock()-t0,'s')
                             
             #
             # calculate dimensional velocity
             #
-            if self.verbose: print 'Calculating velocities from normalized data'
+            if self.verbose:
+                print('Calculating velocities from normalized data')
             for i in range(3):
                 self.U[i,:,:,:] -= self.Vintercept[i]
                 self.U[i,:,:,:] /= self.Vslope[i]
@@ -144,16 +150,20 @@ class TurbSim(InflowPlane):
                     self.Utow[i,:,:] /= self.Vslope[i]
             self.U[0,:,:,:] -= self.Umean # uniform inflow w/ no shear assumed
 
-            print '  u min/max [',np.min(self.U[0,:,:,:]),np.max(self.U[0,:,:,:]),']'
-            print '  v min/max [',np.min(self.U[1,:,:,:]),np.max(self.U[1,:,:,:]),']'
-            print '  w min/max [',np.min(self.U[2,:,:,:]),np.max(self.U[2,:,:,:]),']'
+            print('  u min/max [',np.min(self.U[0,:,:,:]),
+                                  np.max(self.U[0,:,:,:]),']')
+            print('  v min/max [',np.min(self.U[1,:,:,:]),
+                                  np.max(self.U[1,:,:,:]),']')
+            print('  w min/max [',np.min(self.U[2,:,:,:]),
+                                  np.max(self.U[2,:,:,:]),']')
 
             self.scaling = np.ones((3,self.NZ))
 
             #
             # calculate coordinates
             #
-            if self.verbose: print 'Calculating coordinates'
+            if self.verbose:
+                print('Calculating coordinates')
             #self.y = -0.5*(self.NY-1)*self.dy + np.arange(self.NY,dtype=self.realtype)*self.dy
             self.y =             np.arange(self.NY,dtype=self.realtype)*self.dy
             self.z = self.zbot + np.arange(self.NZ,dtype=self.realtype)*self.dz
@@ -161,8 +171,7 @@ class TurbSim(InflowPlane):
 
             self.t = np.arange(self.N,dtype=self.realtype)*self.dt
             if self.verbose:
-                #print 'Read times',self.t
-                print 'Read times [',self.t[0],self.t[1],'...',self.t[-1],']'
+                print('Read times [',self.t[0],self.t[1],'...',self.t[-1],']')
 
 
 class GaborKS(InflowPlane):
@@ -180,7 +189,7 @@ class GaborKS(InflowPlane):
         self.Ncomp = 3
         if potentialTemperature is not None:
             self.Ncomp += 1
-            print 'Note: Potential temperature is not currently handled!'
+            print('Note: Potential temperature is not currently handled!')
             fieldnames.append('potT')
 
         self.fnames = [ '{}_{}_t{:06d}.out'.format(prefix,fieldvar,tidx) for fieldvar in fieldnames ]
@@ -195,23 +204,23 @@ class GaborKS(InflowPlane):
             self.Umean = self.dx
         elif self.Umean is None:
             self.Umean = self.dx / self.dt
-            print 'Specified dt =',self.dt
-            print 'Calculated Umean =',self.Umean
+            print('Specified dt =',self.dt)
+            print('Calculated Umean =',self.Umean)
         elif self.dt is None:
             self.dt = self.dx / self.Umean
-            print 'Specified Umean =',self.Umean
-            print 'Calculated dt =',self.dt
+            print('Specified Umean =',self.Umean)
+            print('Calculated dt =',self.dt)
         else:
             if self.verbose:
-                print 'Specified Umean, dt =',self.Umean,self.dt
+                print('Specified Umean, dt =',self.Umean,self.dt)
 
         self.t = np.arange(self.NX)*self.dt
         self.y = np.arange(self.NY)*self.dy
         self.z = np.arange(self.NZ)*self.dz
         if self.verbose:
-            print 't range:',[np.min(self.t),np.max(self.t)]
-            print 'y range:',[np.min(self.y),np.max(self.y)]
-            print 'z range:',[np.min(self.z),np.max(self.z)]
+            print('t range:',[np.min(self.t),np.max(self.t)])
+            print('y range:',[np.min(self.y),np.max(self.y)])
+            print('z range:',[np.min(self.z),np.max(self.z)])
 
         if self.fnames is not None:
             self.read_field(self.fnames)
@@ -237,10 +246,10 @@ class GaborKS(InflowPlane):
                 np.linspace(self.dz/2,self.Lz-(self.dz/2),self.NZ),
                 indexing='ij')
 
-        print 'Read info file',fname
+        print('Read info file',fname)
         if self.verbose:
-            print '  domain dimensions:',[self.NX,self.NY,self.NZ]
-            print '  domain extents:',[self.Lx,self.Ly,self.Lz],'m'
+            print('  domain dimensions:',[self.NX,self.NY,self.NZ])
+            print('  domain extents:',[self.Lx,self.Ly,self.Lz],'m')
 
 
     def read_field(self,fnames):

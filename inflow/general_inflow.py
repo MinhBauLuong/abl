@@ -2,8 +2,10 @@ from __future__ import print_function
 import sys,os
 import time
 
+import numpy as np
+
 import datatools.SOWFA.timeVaryingMappedBC as bc
-from NWTC.datatools.binario import binaryfile
+from datatools.binario import binaryfile
 
 class InflowPlane(object):
     """This is the base class for all inflows. User should create an
@@ -567,7 +569,7 @@ class InflowPlane(object):
             print('Writing out VTK for time step',itime,': t=',self.t[itime])
 
         # scale fluctuations
-        up = np.zeros((1,self.NY,self.NZ)) # y-z plane
+        up = np.zeros((1,self.NY,self.NZ)) # constant x plane (3D array for VTK output)
         wp = np.zeros((1,self.NY,self.NZ))
         vp = np.zeros((1,self.NY,self.NZ))
         up[0,:,:] = self.U[0,itime,:,:]
