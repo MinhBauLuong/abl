@@ -41,12 +41,16 @@ class InflowPlane(object):
         self.mean_flow_read = True
         self.variances_read = True
 
+        # inflow plane coordinates
+        self.y = None
+        self.z = None
+
         # set by calculateRMS
         self.uu_mean = None
         self.vv_mean = None
         self.ww_mean = None
 
-        # for backwards compatibility (set by readAllProfiles or readVarianceProfile)
+        # constant profiles, set by readAllProfiles or readVarianceProfile)
         self.z_profile = None
         self.uu_profile = None
         self.vv_profile = None
@@ -443,6 +447,7 @@ class InflowPlane(object):
     def write_sowfa_mapped_BC(self,
                               outputdir='boundaryData',
                               time_varying_input=None,
+                              ref_height=None,
                               bcname='west',
                               xinlet=0.0,
                               tstart=0.0,
@@ -460,6 +465,8 @@ class InflowPlane(object):
         if not os.path.isdir(dpath):
             print('Creating output dir :',dpath)
             os.makedirs(dpath)
+
+        if ref_height is not None: assert(self.z is not None)
 
         # TODO: check time-varying input
         assert(time_varying_input is not None)
@@ -493,21 +500,46 @@ class InflowPlane(object):
             if not os.path.isdir(prefix):
                 os.makedirs(prefix)
 
+            # get fluctuations at current time
             if periodic:
                 itime0 = np.mod(itime, self.N)
             else:
                 itime0 = itime
-            u[:,:] = self.U[0,itime0,:NY,:NZ] # self.U.shape==(3, NT, NY, NZ)
-            v[:,:] = self.U[1,itime0,:NY,:NZ] # self.U.shape==(3, NT, NY, NZ)
+            #u[:,:] = self.U[0,itime0,:NY,:NZ] # self.U.shape==(3, NT, NY, NZ)
+            #v[:,:] = self.U[1,itime0,:NY,:NZ] # self.U.shape==(3, NT, NY, NZ)
+            utmp = self.U[0,itime0,:NY,:NZ].copy()
+            vtmp = self.U[1,itime0,:NY,:NZ].copy()
             w[:,:] = self.U[2,itime0,:NY,:NZ] # self.U.shape==(3, NT, NY, NZ)
             T[:,:] = self.T[itime0,:NY,:NZ] # self.T.shape==(NT, NY, NZ)
 
             # scale fluctuations
             for iz in range(NZ): # note: u is the original size
-                u[:,iz] *= self.scaling[0,iz]
-                v[:,iz] *= self.scaling[1,iz]
+                utmp[:,iz] *= self.scaling[0,iz]
+                vtmp[:,iz] *= self.scaling[1,iz]
                 w[:,iz] *= self.scaling[2,iz]
 
+            # rotate fluctuating field
+            # TODO: allow for constant input
+            winddir_profile = np.mean(np.arctan2(Uinput[itime,:,:,1],
+                                                 Uinput[itime,:,:,0]), axis=0)
+            if ref_height is not None:
+                mean_winddir = np.interp(ref_height, self.z, winddir_profile)
+            else:
+                mean_winddir = np.mean(winddir_profile)
+            mean_winddir_compass = 270.0 - 180.0/np.pi*mean_winddir
+            if mean_winddir_compass < 0:
+                mean_winddir_compass += 360.0
+            if ref_height is not None:
+                print(('Mean wind dir at {:.1f} m is {:.1f} deg,' \
+                    + ' rotating by {:.1f} deg').format(ref_height,
+                        mean_winddir_compass, mean_winddir*180.0/np.pi))
+            else:
+                print(('Mean wind dir is {:.1f} deg,' \
+                    + ' rotating by {:.1f} deg').format(
+                        mean_winddir_compass, mean_winddir*180.0/np.pi))
+            u[:,:] = utmp*np.cos(mean_winddir) - vtmp*np.sin(mean_winddir)
+            v[:,:] = utmp*np.sin(mean_winddir) + vtmp*np.cos(mean_winddir)
+            
             # superimpose inlet snapshot
             u[:,:] += Uinput[itime,:,:,0]
             v[:,:] += Uinput[itime,:,:,1]

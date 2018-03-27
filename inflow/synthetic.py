@@ -16,13 +16,13 @@ from datatools.binario import binaryfile
 
 class TurbSim(InflowPlane):
 
-    def __init__(self, fname=None, Umean=None, verbose=False):
+    def __init__(self, fname=None, Umean=None, verbose=False, **kwargs):
         """Processes binary full-field time series output from TurbSim.
 
         Tested with TurbSim v2.00.05c-bjj, 25-Feb-2016
         Tested with pyTurbsim, 10-07-2017
         """
-        super(self.__class__,self).__init__(verbose)
+        super(self.__class__,self).__init__(verbose,**kwargs)
         self.Umean = Umean
 
         if fname is not None:
@@ -181,10 +181,11 @@ class GaborKS(InflowPlane):
             tidx=0,
             dt=None, Umean=None,
             potentialTemperature=None,
-            verbose=True):
+            verbose=True,
+            **kwargs):
         """Processes binary output from Gabor KS.
         """
-        super(self.__class__,self).__init__(verbose)
+        super(self.__class__,self).__init__(verbose,**kwargs)
         
         fieldnames = ['uVel','vVel','wVel']
         self.Ncomp = 3
