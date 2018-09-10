@@ -34,6 +34,7 @@ def get_sounding(url):
         obs[i]['datetime'] = datetime
         obs[i]['station'] = station
         obs[i] = obs[i][['datetime','station']+columns]
+        info[i]['Units'] = units
     return obs, info
 
 def _read_sounding_obs(text):
@@ -41,7 +42,8 @@ def _read_sounding_obs(text):
     lines = text.split('\n')
     assert(lines[0].startswith('---'))
     columns = lines[1].split()
-    units = lines[2]
+    units = lines[2].split()
+    assert(len(columns)==len(units))
     assert(lines[3].startswith('---'))
     buf = StringIO(text)
     df = pd.read_fwf(buf, names=columns, skiprows=4)
