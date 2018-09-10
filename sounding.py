@@ -23,6 +23,8 @@ def get_sounding(url):
         text = pre.text.strip()
         if text.startswith('---'):
             df, columns, units = _read_sounding_obs(text)
+            heights = df.loc[~pd.isna(df['TEMP']),'HGHT']
+            df['height_AGL'] = df['HGHT'] - heights.iloc[0]
             obs.append(df)
         else:
             info.append(_read_sounding_info(text))
@@ -33,7 +35,7 @@ def get_sounding(url):
                                   format='%y%m%d/%H%M')
         obs[i]['datetime'] = datetime
         obs[i]['station'] = station
-        obs[i] = obs[i][['datetime','station']+columns]
+        obs[i] = obs[i][['datetime','station','height_AGL']+columns]
         info[i]['Units'] = units
     return obs, info
 
