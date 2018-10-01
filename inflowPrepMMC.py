@@ -7,6 +7,7 @@
 #
 # This is a module to deal with preparing inflow for mesoscale-microscale 
 # coupled cases over complex terrain.
+from __future__ import print_function
 
 
 import numpy as np
@@ -264,8 +265,8 @@ class inflowPrepMMC:
                 elif planeType == 'yz':
                     sortOrder = [2,1]
                 else:
-                    print 'Invalid specification of planeType:'
-                    print 'Need xy, xz, or yz.'
+                    print('Invalid specification of planeType:')
+                    print('Need xy, xz, or yz.')
                     
             sortInd = np.lexsort((self.xyz[:,sortOrder[0]],self.xyz[:,sortOrder[1]]))
             
@@ -315,7 +316,7 @@ class inflowPrepMMC:
         if (planeType == 'yz'):
             ind = self.xyz[:,1].argmin()
             
-        print ind
+        print(ind)
             
         return xyzBound
     
