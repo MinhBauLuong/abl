@@ -5,6 +5,7 @@ import time
 import numpy as np
 
 import datatools.SOWFA.timeVaryingMappedBC as sowfa_bc
+from datatools.vtkTools import vtk_write_structured_points
 
 class InflowPlane(object):
     """This is the base class for all inflows. User should create an
@@ -675,7 +676,7 @@ class InflowPlane(object):
             Umean = 1.0
 
         # scale fluctuations
-        Nt = self.N / step
+        Nt = int(self.N / step)
         up = np.zeros((Nt,self.NY,self.NZ))
         vp = np.zeros((Nt,self.NY,self.NZ))
         wp = np.zeros((Nt,self.NY,self.NZ))
