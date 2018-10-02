@@ -39,8 +39,8 @@ class InflowPlane(object):
 #        self.Useries = None # used if needUpdateMean is True
 #        self.Tseries = None # used if needUpdateMean is True
 
-        self.mean_flow_read = True
-        self.variances_read = True
+        self.mean_flow_read = False
+        self.variances_read = False
 
         # inflow plane coordinates
         self.y = None
