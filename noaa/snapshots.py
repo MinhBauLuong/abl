@@ -17,9 +17,16 @@
 #   the snapshots in the separate time directories, so that the complete time series can be
 #   previewed in flipbook fashion.
 #
+from __future__ import print_function
 import os
 import argparse
-import urllib2
+
+try:
+    # python 2
+    from urllib2 import urlopen
+except ImportError:
+    # python 3
+    from urllib.request import urlopen
 
 # Sample complete URL:
 #urlstr = 'https://rapidrefresh.noaa.gov/hrrr/HRRRwfipsubh/displayMapLocalDiskDateDomainZipTZA.cgi?keys=hrrr_wfip_nest_subh_jet:&runtime=2016111206&plot_type=sfc_ri&fcst=0100&time_inc=15&num_times=61&model=hrrr&ptitle=HRRR-WFIP2%20Model%20Fields%20-%20Experimental&maxFcstLen=15&fcstStrLen=-1&domain=nest&adtfn=1'
@@ -36,15 +43,16 @@ adtfn = '1'
 
 
 def get_imagepath(url):
-    htmlfile = urllib2.urlopen(url)
+    htmlfile = urlopen(url)
     for line in htmlfile:
-        if 'for_web' in line: break
+        if b'for_web' in line: break
+    line = str(line)
     ist = line.find('src=')
     line = line[ist+5:].split('"')[0]
     return baseurl + '/' + line
 
 def download_image(url,name=None):
-    imgfile = urllib2.urlopen(url)
+    imgfile = urlopen(url)
     if name is None:
         name = url.split('/')[-1]
     outfile = os.path.join(outdir,name)
@@ -106,6 +114,6 @@ if __name__ == '__main__':
             'domain='+args.domain + '&' \
             'adtfn='+adtfn
         imgurl = get_imagepath(newurlstr)
-        print 'Downloading from',imgurl
+        print('Downloading from',imgurl)
         download_image(imgurl)
 
